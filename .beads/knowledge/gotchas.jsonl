@@ -1,0 +1,7 @@
+{"type": "gotcha", "fact": "SQLAlchemy expire_on_commit=True (default) — always db.refresh(obj) before reading attributes post-commit", "source": "code-review"}
+{"type": "gotcha", "fact": "SQLite ignores FK constraints unless PRAGMA foreign_keys=ON is set per connection — not set at engine level", "source": "code-review"}
+{"type": "gotcha", "fact": "passlib[bcrypt] is incompatible with bcrypt>=4 on Python 3.14 — use bcrypt directly instead", "source": "implementation"}
+{"type": "gotcha", "fact": "pydantic-core 2.9.2 has no wheel for Python 3.14 — use pydantic>=2.13.4 which ships pydantic-core 2.46+", "source": "implementation"}
+{"type": "gotcha", "fact": "gh label command not available in older gh CLI versions — use gh api repos/owner/repo/labels instead", "source": "implementation"}
+{"type": "gotcha", "fact": "gh project add-item requires project scope in token — run: gh auth refresh -s project", "source": "implementation"}
+{"type": "gotcha", "fact": "CORSMiddleware without allow_credentials=True blocks all browser requests that include Authorization header", "source": "code-review"}

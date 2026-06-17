@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "project": {
+    "name": "i2i-anticlock-metaswarm",
+    "description": "CRM MVP — FastAPI backend + React frontend",
+    "github_repo": "KasirajanA/i2i-anticlock-metaswarm",
+    "github_project": 1,
+    "task_tracking": "github_project"
+  },
+  "stack": {
+    "backend": {
+      "language": "python",
+      "version": "3.14.4",
+      "framework": "fastapi",
+      "orm": "sqlalchemy",
+      "db": "sqlite",
+      "conda_env": "anticlock",
+      "test_runner": "pytest",
+      "coverage_threshold": 80,
+      "entry_point": "crm/backend/main.py",
+      "run_cmd": "conda run -n anticlock uvicorn main:app --reload --app-dir crm/backend"
+    },
+    "frontend": {
+      "language": "javascript",
+      "framework": "react",
+      "bundler": "vite",
+      "node_version": "18.20.8",
+      "entry_point": "crm/frontend/src/main.jsx",
+      "run_cmd": "cd crm/frontend && npm run dev",
+      "build_cmd": "cd crm/frontend && npm run build"
+    }
+  },
+  "external_tools": {
+    "codex": { "enabled": true },
+    "gemini": { "enabled": true }
+  },
+  "quality": {
+    "coverage_threshold": 80,
+    "lint_backend": "ruff",
+    "lint_frontend": "eslint"
+  }
+}

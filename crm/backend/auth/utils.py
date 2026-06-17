@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 import bcrypt
+import os
 
-SECRET_KEY = "change-this-in-production"
+SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-in-production")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 24
 
@@ -23,6 +24,6 @@ def create_token(email: str) -> str:
 def decode_token(token: str) -> str:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload["sub"]
+        return payload.get("sub")
     except JWTError:
         return None

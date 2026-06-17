@@ -1,0 +1,6 @@
+{"type": "pattern", "fact": "Backend module structure: __init__.py + models.py + schemas.py + router.py — all under crm/backend/<module>/", "source": "architecture"}
+{"type": "pattern", "fact": "CRUD pattern: Model(**data.model_dump()) → db.add → db.commit → db.refresh → return out schema", "source": "architecture"}
+{"type": "pattern", "fact": "Update pattern: get-or-404 → setattr loop with model_dump(exclude_none=True) → db.commit → db.refresh", "source": "architecture"}
+{"type": "pattern", "fact": "All router endpoints protected with _=Depends(get_current_user) imported from auth.router", "source": "architecture"}
+{"type": "pattern", "fact": "Pydantic schemas: separate Create (required fields), Update (all Optional), Out (from_attributes=True)", "source": "architecture"}
+{"type": "pattern", "fact": "Frontend pages: useState for list + form + editing id + showModal + error; load() re-fetches after mutations", "source": "architecture"}

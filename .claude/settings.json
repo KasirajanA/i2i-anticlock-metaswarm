@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(conda run -n anticlock *)",
+      "Bash(gh issue *)",
+      "Bash(gh pr *)",
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(cd crm/backend && *)",
+      "Bash(cd crm/frontend && *)",
+      "Bash(pytest *)"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{"type": "must-follow", "fact": "NEVER commit a hardcoded SECRET_KEY — always load from os.environ.get('SECRET_KEY', fallback)", "source": "security-review"}
+{"type": "must-follow", "fact": "ALWAYS call db.refresh(obj) after db.commit() before accessing ORM attributes on the committed object", "source": "code-review"}
+{"type": "must-follow", "fact": "ALWAYS add allow_credentials=True to CORSMiddleware when the frontend sends Authorization headers", "source": "code-review"}
+{"type": "must-follow", "fact": "NEVER use payload['sub'] on a decoded JWT — use payload.get('sub') to avoid unhandled KeyError 500", "source": "code-review"}
+{"type": "must-follow", "fact": "ALWAYS wrap frontend async API calls in try/catch and show a user-visible error message on failure", "source": "code-review"}
+{"type": "must-follow", "fact": "NEVER use window.location.href for in-app navigation — use React Router navigate()", "source": "code-review"}
+{"type": "must-follow", "fact": "SQLite FK enforcement requires PRAGMA foreign_keys=ON set via SQLAlchemy event listener on every connection", "source": "code-review"}
+{"type": "must-follow", "fact": "Password fields in Pydantic schemas must enforce minimum 8 characters via field_validator", "source": "code-review"}
+{"type": "must-follow", "fact": "All GitHub issues must have implementation comments before being closed", "source": "process"}
+{"type": "must-follow", "fact": "Task tracking uses GitHub Project #1 (KasirajanA/i2i-anticlock-metaswarm) — do NOT use built-in TaskCreate/TaskUpdate", "source": "process"}
