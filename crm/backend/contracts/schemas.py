@@ -1,16 +1,17 @@
 from pydantic import BaseModel
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, Literal
 
 
 class ContractBase(BaseModel):
     title: str
     client_name: Optional[str] = None
     value: float = 0.0
-    status: str = "draft"
+    status: Literal["draft", "active", "expired", "cancelled"] = "draft"
     contact_id: Optional[int] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    notes: Optional[str] = None
 
 
 class ContractCreate(ContractBase):
@@ -21,10 +22,11 @@ class ContractUpdate(BaseModel):
     title: Optional[str] = None
     client_name: Optional[str] = None
     value: Optional[float] = None
-    status: Optional[str] = None
+    status: Optional[Literal["draft", "active", "expired", "cancelled"]] = None
     contact_id: Optional[int] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    notes: Optional[str] = None
 
 
 class ContractOut(ContractBase):

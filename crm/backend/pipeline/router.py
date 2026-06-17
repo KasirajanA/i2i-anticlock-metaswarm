@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from database import get_db
 from auth.router import get_current_user
 from .models import Deal
@@ -10,8 +10,18 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[DealOut])
-def list_deals(db: Session = Depends(get_db), _=Depends(get_current_user)):
-    return db.query(Deal).all()
+def list_deals(
+    stage: Optional[str] = Query(None),
+    contact_id: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+    _=Depends(get_current_user),
+):
+    query = db.query(Deal)
+    if stage:
+        query = query.filter(Deal.stage == stage)
+    if contact_id:
+        query = query.filter(Deal.contact_id == contact_id)
+    return query.all()
 
 
 @router.post("/", response_model=DealOut, status_code=201)

@@ -9,7 +9,8 @@ class Ticket(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(Text)
-    status = Column(String, default="open")      # open | in_progress | closed
-    priority = Column(String, default="medium")  # low | medium | high
+    status = Column(String, default="open")
+    priority = Column(String, default="medium")
     contact_id = Column(Integer, ForeignKey("contacts.id", ondelete="SET NULL"), nullable=True)
+    resolved_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())

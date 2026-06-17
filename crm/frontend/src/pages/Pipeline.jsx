@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import api from '../api/client'
 
-const STAGES = ['lead', 'qualified', 'proposal', 'won', 'lost']
-const EMPTY = { title: '', value: 0, stage: 'lead', contact_id: '' }
+const STAGES = ['lead', 'qualified', 'proposal', 'negotiation', 'won', 'lost']
+const EMPTY = { title: '', value: 0, stage: 'lead', contact_id: '', expected_close_date: '', notes: '' }
 
 export default function Pipeline() {
   const [deals, setDeals] = useState([])
@@ -19,12 +19,22 @@ export default function Pipeline() {
   useEffect(() => { load() }, [])
 
   const openCreate = () => { setForm(EMPTY); setEditing(null); setShowModal(true) }
-  const openEdit = (d) => { setForm({ ...d, contact_id: d.contact_id || '' }); setEditing(d.id); setShowModal(true) }
+  const openEdit = (d) => {
+    setForm({ ...d, contact_id: d.contact_id || '', expected_close_date: d.expected_close_date || '', notes: d.notes || '' })
+    setEditing(d.id)
+    setShowModal(true)
+  }
 
   const save = async (e) => {
     e.preventDefault()
+    setError('')
     try {
-      const payload = { ...form, value: Number(form.value), contact_id: form.contact_id || null }
+      const payload = {
+        ...form,
+        value: Number(form.value),
+        contact_id: form.contact_id || null,
+        expected_close_date: form.expected_close_date || null,
+      }
       if (editing) await api.put(`/pipeline/${editing}`, payload)
       else await api.post('/pipeline/', payload)
       setShowModal(false)
@@ -45,6 +55,7 @@ export default function Pipeline() {
   }
 
   const byStage = (stage) => deals.filter((d) => d.stage === stage)
+  const totalValue = (stage) => byStage(stage).reduce((sum, d) => sum + d.value, 0)
 
   return (
     <div>
@@ -57,11 +68,17 @@ export default function Pipeline() {
       <div className="pipeline-board">
         {STAGES.map((stage) => (
           <div key={stage} className="pipeline-col">
-            <h3>{stage} ({byStage(stage).length})</h3>
+            <div className="pipeline-col-header">
+              <strong>{stage}</strong>
+              <span>{byStage(stage).length} · ${totalValue(stage).toLocaleString()}</span>
+            </div>
             {byStage(stage).map((d) => (
               <div key={d.id} className="deal-card">
                 <div>{d.title}</div>
                 <div className="deal-value">${d.value.toLocaleString()}</div>
+                {d.expected_close_date && (
+                  <div className="deal-date">Close: {d.expected_close_date}</div>
+                )}
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                   <button className="btn btn-sm" onClick={() => openEdit(d)}>Edit</button>
                   <button className="btn btn-danger" onClick={() => remove(d.id)}>Del</button>
@@ -91,6 +108,14 @@ export default function Pipeline() {
                   <option value="">— none —</option>
                   {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
+              </div>
+              <div>
+                <label>Expected Close Date</label>
+                <input type="date" value={form.expected_close_date} onChange={(e) => setForm({ ...form, expected_close_date: e.target.value })} />
+              </div>
+              <div>
+                <label>Notes</label>
+                <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} />
               </div>
               <div className="form-actions">
                 <button type="button" className="btn btn-cancel" onClick={() => setShowModal(false)}>Cancel</button>

@@ -1,13 +1,15 @@
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
+from datetime import date, datetime
+from typing import Optional, Literal
 
 
 class DealBase(BaseModel):
     title: str
     value: float = 0.0
-    stage: str = "lead"
+    stage: Literal["lead", "qualified", "proposal", "negotiation", "won", "lost"] = "lead"
     contact_id: Optional[int] = None
+    expected_close_date: Optional[date] = None
+    notes: Optional[str] = None
 
 
 class DealCreate(DealBase):
@@ -17,8 +19,10 @@ class DealCreate(DealBase):
 class DealUpdate(BaseModel):
     title: Optional[str] = None
     value: Optional[float] = None
-    stage: Optional[str] = None
+    stage: Optional[Literal["lead", "qualified", "proposal", "negotiation", "won", "lost"]] = None
     contact_id: Optional[int] = None
+    expected_close_date: Optional[date] = None
+    notes: Optional[str] = None
 
 
 class DealOut(DealBase):

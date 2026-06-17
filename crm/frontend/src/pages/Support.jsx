@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import api from '../api/client'
 
+const STATUSES = ['open', 'in_progress', 'resolved', 'closed']
+const PRIORITIES = ['low', 'medium', 'high', 'urgent']
 const EMPTY = { title: '', description: '', status: 'open', priority: 'medium', contact_id: '' }
-const STATUS_BADGE = { open: 'badge-blue', in_progress: 'badge-yellow', closed: 'badge-green' }
-const PRIORITY_BADGE = { low: 'badge-gray', medium: 'badge-yellow', high: 'badge-red' }
+
+const STATUS_BADGE = { open: 'badge-blue', in_progress: 'badge-yellow', resolved: 'badge-green', closed: 'badge-gray' }
+const PRIORITY_BADGE = { low: 'badge-gray', medium: 'badge-yellow', high: 'badge-red', urgent: 'badge-red' }
 
 export default function Support() {
   const [tickets, setTickets] = useState([])
@@ -12,18 +15,26 @@ export default function Support() {
   const [editing, setEditing] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState('')
 
-  const load = () => Promise.all([
-    api.get('/support/').then((r) => setTickets(r.data)),
-    api.get('/contacts/').then((r) => setContacts(r.data)),
-  ]).catch(() => setError('Failed to load tickets'))
-  useEffect(() => { load() }, [])
+  const load = () => {
+    const params = new URLSearchParams()
+    if (statusFilter) params.set('status', statusFilter)
+    if (priorityFilter) params.set('priority', priorityFilter)
+    Promise.all([
+      api.get(`/support/?${params}`).then((r) => setTickets(r.data)),
+      api.get('/contacts/').then((r) => setContacts(r.data)),
+    ]).catch(() => setError('Failed to load tickets'))
+  }
+  useEffect(() => { load() }, [statusFilter, priorityFilter])
 
   const openCreate = () => { setForm(EMPTY); setEditing(null); setShowModal(true) }
   const openEdit = (t) => { setForm({ ...t, contact_id: t.contact_id || '' }); setEditing(t.id); setShowModal(true) }
 
   const save = async (e) => {
     e.preventDefault()
+    setError('')
     try {
       const payload = { ...form, contact_id: form.contact_id || null }
       if (editing) await api.put(`/support/${editing}`, payload)
@@ -53,23 +64,42 @@ export default function Support() {
       </div>
       {error && <p className="error">{error}</p>}
 
+      <div className="filter-bar">
+        <div className="tab-group">
+          {['', ...STATUSES].map((s) => (
+            <button key={s} className={`tab ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
+              {s === '' ? 'All' : s.replace('_', ' ')}
+            </button>
+          ))}
+        </div>
+        <select className="filter-select" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
+          <option value="">All priorities</option>
+          {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+      </div>
+
       <table>
         <thead>
-          <tr><th>Title</th><th>Status</th><th>Priority</th><th>Created</th><th></th></tr>
+          <tr><th>Title</th><th>Contact</th><th>Status</th><th>Priority</th><th>Created</th><th>Resolved</th><th></th></tr>
         </thead>
         <tbody>
-          {tickets.map((t) => (
-            <tr key={t.id}>
-              <td>{t.title}</td>
-              <td><span className={`badge ${STATUS_BADGE[t.status] || 'badge-gray'}`}>{t.status}</span></td>
-              <td><span className={`badge ${PRIORITY_BADGE[t.priority] || 'badge-gray'}`}>{t.priority}</span></td>
-              <td>{new Date(t.created_at).toLocaleDateString()}</td>
-              <td style={{ display: 'flex', gap: '0.5rem' }}>
-                <button className="btn btn-sm" onClick={() => openEdit(t)}>Edit</button>
-                <button className="btn btn-danger" onClick={() => remove(t.id)}>Del</button>
-              </td>
-            </tr>
-          ))}
+          {tickets.map((t) => {
+            const contact = contacts.find((c) => c.id === t.contact_id)
+            return (
+              <tr key={t.id}>
+                <td>{t.title}</td>
+                <td>{contact?.name || '—'}</td>
+                <td><span className={`badge ${STATUS_BADGE[t.status] || 'badge-gray'}`}>{t.status.replace('_', ' ')}</span></td>
+                <td><span className={`badge ${PRIORITY_BADGE[t.priority] || 'badge-gray'}`}>{t.priority}</span></td>
+                <td>{new Date(t.created_at).toLocaleDateString()}</td>
+                <td>{t.resolved_at ? new Date(t.resolved_at).toLocaleDateString() : '—'}</td>
+                <td style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="btn btn-sm" onClick={() => openEdit(t)}>Edit</button>
+                  <button className="btn btn-danger" onClick={() => remove(t.id)}>Del</button>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
 
@@ -79,17 +109,17 @@ export default function Support() {
             <h2>{editing ? 'Edit' : 'New'} Ticket</h2>
             <form onSubmit={save}>
               <div><label>Title</label><input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-              <div><label>Description</label><textarea value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+              <div><label>Description</label><textarea value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
               <div>
                 <label>Status</label>
                 <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-                  {['open', 'in_progress', 'closed'].map((s) => <option key={s} value={s}>{s}</option>)}
+                  {STATUSES.map((s) => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
                 </select>
               </div>
               <div>
                 <label>Priority</label>
                 <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-                  {['low', 'medium', 'high'].map((p) => <option key={p} value={p}>{p}</option>)}
+                  {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
