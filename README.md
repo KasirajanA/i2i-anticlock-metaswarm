@@ -110,6 +110,11 @@ Full interactive docs at `http://localhost:8000/docs` when the backend is runnin
 
 Detailed module specifications live in [`specs/`](specs/README.md). Each spec covers the data model, API endpoints, validation rules, and frontend requirements.
 
+## Issue Tracking
+
+Tasks and bugs are tracked on the [GitHub Project board](https://github.com/users/KasirajanA/projects/1/views/1).
+Issues live at [github.com/KasirajanA/i2i-anticlock-metaswarm/issues](https://github.com/KasirajanA/i2i-anticlock-metaswarm/issues).
+
 ## Running Tests
 
 ```bash
