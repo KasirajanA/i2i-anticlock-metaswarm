@@ -1,5 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuth } from './context/AuthContext'
+import { setNavigate } from './api/client'
+
+function NavigateSetter() {
+  const navigate = useNavigate()
+  useEffect(() => { setNavigate(navigate) }, [navigate])
+  return null
+}
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Contacts from './pages/Contacts'
@@ -40,6 +48,7 @@ function PrivateRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <NavigateSetter />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

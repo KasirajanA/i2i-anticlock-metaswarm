@@ -11,11 +11,12 @@ export default function Support() {
   const [form, setForm] = useState(EMPTY)
   const [editing, setEditing] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [error, setError] = useState('')
 
   const load = () => Promise.all([
     api.get('/support/').then((r) => setTickets(r.data)),
     api.get('/contacts/').then((r) => setContacts(r.data)),
-  ])
+  ]).catch(() => setError('Failed to load tickets'))
   useEffect(() => { load() }, [])
 
   const openCreate = () => { setForm(EMPTY); setEditing(null); setShowModal(true) }
@@ -23,17 +24,25 @@ export default function Support() {
 
   const save = async (e) => {
     e.preventDefault()
-    const payload = { ...form, contact_id: form.contact_id || null }
-    if (editing) await api.put(`/support/${editing}`, payload)
-    else await api.post('/support/', payload)
-    setShowModal(false)
-    load()
+    try {
+      const payload = { ...form, contact_id: form.contact_id || null }
+      if (editing) await api.put(`/support/${editing}`, payload)
+      else await api.post('/support/', payload)
+      setShowModal(false)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to save ticket')
+    }
   }
 
   const remove = async (id) => {
     if (!confirm('Delete this ticket?')) return
-    await api.delete(`/support/${id}`)
-    load()
+    try {
+      await api.delete(`/support/${id}`)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to delete ticket')
+    }
   }
 
   return (
@@ -42,6 +51,7 @@ export default function Support() {
         <h1>Customer Support</h1>
         <button className="btn btn-primary" onClick={openCreate}>+ New Ticket</button>
       </div>
+      {error && <p className="error">{error}</p>}
 
       <table>
         <thead>

@@ -23,6 +23,14 @@ def create_deal(data: DealCreate, db: Session = Depends(get_db), _=Depends(get_c
     return deal
 
 
+@router.get("/{id}", response_model=DealOut)
+def get_deal(id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    deal = db.query(Deal).filter(Deal.id == id).first()
+    if not deal:
+        raise HTTPException(status_code=404, detail="Deal not found")
+    return deal
+
+
 @router.put("/{id}", response_model=DealOut)
 def update_deal(id: int, data: DealUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
     deal = db.query(Deal).filter(Deal.id == id).first()

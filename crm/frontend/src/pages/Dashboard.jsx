@@ -9,15 +9,17 @@ const STAGE_COLORS = {
 export default function Dashboard() {
   const [summary, setSummary] = useState(null)
   const [pipeline, setPipeline] = useState(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    api.get('/reporting/summary').then((r) => setSummary(r.data))
-    api.get('/reporting/pipeline').then((r) => setPipeline(r.data))
+    api.get('/reporting/summary').then((r) => setSummary(r.data)).catch(() => setError('Failed to load summary'))
+    api.get('/reporting/pipeline').then((r) => setPipeline(r.data)).catch(() => setError('Failed to load pipeline'))
   }, [])
 
   return (
     <div>
       <h1>Dashboard</h1>
+      {error && <p className="error">{error}</p>}
       {summary && (
         <div className="stats-grid">
           {[

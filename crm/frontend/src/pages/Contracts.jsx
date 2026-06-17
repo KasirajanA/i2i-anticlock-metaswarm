@@ -11,11 +11,12 @@ export default function Contracts() {
   const [form, setForm] = useState(EMPTY)
   const [editing, setEditing] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [error, setError] = useState('')
 
   const load = () => Promise.all([
     api.get('/contracts/').then((r) => setContracts(r.data)),
     api.get('/contacts/').then((r) => setContacts(r.data)),
-  ])
+  ]).catch(() => setError('Failed to load contracts'))
   useEffect(() => { load() }, [])
 
   const openCreate = () => { setForm(EMPTY); setEditing(null); setShowModal(true) }
@@ -23,17 +24,25 @@ export default function Contracts() {
 
   const save = async (e) => {
     e.preventDefault()
-    const payload = { ...form, value: Number(form.value), contact_id: form.contact_id || null, start_date: form.start_date || null, end_date: form.end_date || null }
-    if (editing) await api.put(`/contracts/${editing}`, payload)
-    else await api.post('/contracts/', payload)
-    setShowModal(false)
-    load()
+    try {
+      const payload = { ...form, value: Number(form.value), contact_id: form.contact_id || null, start_date: form.start_date || null, end_date: form.end_date || null }
+      if (editing) await api.put(`/contracts/${editing}`, payload)
+      else await api.post('/contracts/', payload)
+      setShowModal(false)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to save contract')
+    }
   }
 
   const remove = async (id) => {
     if (!confirm('Delete this contract?')) return
-    await api.delete(`/contracts/${id}`)
-    load()
+    try {
+      await api.delete(`/contracts/${id}`)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to delete contract')
+    }
   }
 
   const f = (key, label, type = 'text') => (
@@ -49,6 +58,7 @@ export default function Contracts() {
         <h1>Contracts</h1>
         <button className="btn btn-primary" onClick={openCreate}>+ Add Contract</button>
       </div>
+      {error && <p className="error">{error}</p>}
 
       <table>
         <thead>

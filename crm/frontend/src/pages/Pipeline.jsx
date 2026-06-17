@@ -10,11 +10,12 @@ export default function Pipeline() {
   const [form, setForm] = useState(EMPTY)
   const [editing, setEditing] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [error, setError] = useState('')
 
   const load = () => Promise.all([
     api.get('/pipeline/').then((r) => setDeals(r.data)),
     api.get('/contacts/').then((r) => setContacts(r.data)),
-  ])
+  ]).catch(() => setError('Failed to load pipeline'))
   useEffect(() => { load() }, [])
 
   const openCreate = () => { setForm(EMPTY); setEditing(null); setShowModal(true) }
@@ -22,17 +23,25 @@ export default function Pipeline() {
 
   const save = async (e) => {
     e.preventDefault()
-    const payload = { ...form, value: Number(form.value), contact_id: form.contact_id || null }
-    if (editing) await api.put(`/pipeline/${editing}`, payload)
-    else await api.post('/pipeline/', payload)
-    setShowModal(false)
-    load()
+    try {
+      const payload = { ...form, value: Number(form.value), contact_id: form.contact_id || null }
+      if (editing) await api.put(`/pipeline/${editing}`, payload)
+      else await api.post('/pipeline/', payload)
+      setShowModal(false)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to save deal')
+    }
   }
 
   const remove = async (id) => {
     if (!confirm('Delete this deal?')) return
-    await api.delete(`/pipeline/${id}`)
-    load()
+    try {
+      await api.delete(`/pipeline/${id}`)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to delete deal')
+    }
   }
 
   const byStage = (stage) => deals.filter((d) => d.stage === stage)
@@ -43,6 +52,7 @@ export default function Pipeline() {
         <h1>Sales Pipeline</h1>
         <button className="btn btn-primary" onClick={openCreate}>+ Add Deal</button>
       </div>
+      {error && <p className="error">{error}</p>}
 
       <div className="pipeline-board">
         {STAGES.map((stage) => (

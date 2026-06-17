@@ -8,8 +8,9 @@ export default function Contacts() {
   const [form, setForm] = useState(EMPTY)
   const [editing, setEditing] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [error, setError] = useState('')
 
-  const load = () => api.get('/contacts/').then((r) => setContacts(r.data))
+  const load = () => api.get('/contacts/').then((r) => setContacts(r.data)).catch(() => setError('Failed to load contacts'))
   useEffect(() => { load() }, [])
 
   const openCreate = () => { setForm(EMPTY); setEditing(null); setShowModal(true) }
@@ -17,16 +18,24 @@ export default function Contacts() {
 
   const save = async (e) => {
     e.preventDefault()
-    if (editing) await api.put(`/contacts/${editing}`, form)
-    else await api.post('/contacts/', form)
-    setShowModal(false)
-    load()
+    try {
+      if (editing) await api.put(`/contacts/${editing}`, form)
+      else await api.post('/contacts/', form)
+      setShowModal(false)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to save contact')
+    }
   }
 
   const remove = async (id) => {
     if (!confirm('Delete this contact?')) return
-    await api.delete(`/contacts/${id}`)
-    load()
+    try {
+      await api.delete(`/contacts/${id}`)
+      load()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to delete contact')
+    }
   }
 
   return (
@@ -35,6 +44,7 @@ export default function Contacts() {
         <h1>Contacts & Leads</h1>
         <button className="btn btn-primary" onClick={openCreate}>+ Add</button>
       </div>
+      {error && <p className="error">{error}</p>}
 
       <table>
         <thead>

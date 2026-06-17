@@ -27,6 +27,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     user = User(email=data.email, hashed_password=hash_password(data.password))
     db.add(user)
     db.commit()
+    db.refresh(user)
     return Token(access_token=create_token(user.email))
 
 
