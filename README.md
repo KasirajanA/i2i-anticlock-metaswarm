@@ -6,10 +6,9 @@ A web-based CRM for tracking prospects, deals, contracts, support tickets, and b
 
 | Layer | Tech |
 |---|---|
-| Backend | Python 3.14 · FastAPI · SQLAlchemy · SQLite |
+| Backend | Python 3.9+ · FastAPI · SQLAlchemy · SQLite |
 | Frontend | React 18 · Vite · Axios · React Router |
 | Auth | JWT (python-jose) · bcrypt |
-| Env | Conda (`anticlock`) |
 
 ## Features
 
@@ -23,14 +22,25 @@ A web-based CRM for tracking prospects, deals, contracts, support tickets, and b
 ## Getting Started
 
 ### Prerequisites
-- [Anaconda / Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+
+- Python 3.9+
 - Node.js 18+
 
-### 1. Create the conda environment
+### 1. Set up the Python environment
+
+Using a virtual environment (recommended):
 
 ```bash
-conda create -n anticlock python=3.14 -y
-conda activate anticlock
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r crm/backend/requirements.txt
+```
+
+Or with conda:
+
+```bash
+conda create -n crm python=3.11 -y
+conda activate crm
 pip install -r crm/backend/requirements.txt
 ```
 
@@ -43,11 +53,10 @@ export SECRET_KEY="your-secret-key-here"
 ### 3. Start the backend
 
 ```bash
-conda activate anticlock
 cd crm/backend
 uvicorn main:app --reload
-# API → http://localhost:8000
-# Swagger UI → http://localhost:8000/docs
+# API       → http://localhost:8000
+# Swagger   → http://localhost:8000/docs
 ```
 
 ### 4. Start the frontend
@@ -61,7 +70,7 @@ npm run dev
 
 ### 5. Register an account
 
-Open `http://localhost:5173`, click **No account? Register**, and create your user.
+Open `http://localhost:5173`, click **No account? Register**, and create your user (password min 8 characters).
 
 ## Project Structure
 
@@ -95,7 +104,7 @@ specs/                   # Module specifications (source of truth)
 | Support | `/support` |
 | Reporting | `/reporting` |
 
-Full interactive docs available at `http://localhost:8000/docs` when the backend is running.
+Full interactive docs at `http://localhost:8000/docs` when the backend is running.
 
 ## Specs
 
@@ -104,7 +113,6 @@ Detailed module specifications live in [`specs/`](specs/README.md). Each spec co
 ## Running Tests
 
 ```bash
-conda activate anticlock
 cd crm/backend
 pytest --cov=. --cov-report=term-missing --cov-fail-under=80
 ```
